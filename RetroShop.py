@@ -1,11 +1,20 @@
 console_list = [
-    ["PS3", 4, 130],
+    ["PS3", 3, 130],
     ["DS", 5, 95],
     ["Wii", 10, 120],
     ["PSP", 12, 130],
     ["Ps vita", 9, 250]
 ]
 shopping_cart = {} 
+
+def search():
+    print("Search function not implemented yet.")
+
+def delivery():
+    print("Delivery info not implemented yet.")
+
+def checkout():
+    print("Checkout not implemented yet.")
 
 
 def int_input_check(text):
@@ -33,19 +42,23 @@ def order():
     """
     Allows user to select console in list and order it
     """
-    print_console_list()
     loop = "yes"
     while loop == "yes":
+        print_console_list()
         user_input = int_input_check("Choose a console via number its next to:\n> ")
         chosen_console = console_list[user_input - 1] # list start from 0 so make sure its right.
+        if console_list[user_input - 1][1] <= 0: # Dont allow stock to go under 1
+            print("Sorry, that console is out of stock.")
+            loop = input("Continue ordering (yes)? \n> ").lower()
+            continue  # This will stop the function here
         console_list[user_input - 1][1] -= 1 # Remove 1 from stock
-        print(f"You chose option #{chosen_console}") # see chosen console
-        name = chosen_console[0] # Finds the name of the console 
-        if name in shopping_cart: # If the name is in the dic then add 1 to the amount
-            shopping_cart[name] += 1    
+        print(f"You chose the {chosen_console[0]}") # see chosen console
+        if chosen_console[0] in shopping_cart: # If the name is in the list then add 1 to the amount
+            shopping_cart[chosen_console[0]] += 1    
         else: # If name isent set the value to 1
-            shopping_cart[name] = 1
-        loop = input("Add another item (yes)? >\n> ").lower()
+            shopping_cart[chosen_console[0]] = 1
+        cart()
+        loop = input("Add another item (yes)? \n> ").lower()
 
 
 
@@ -57,7 +70,7 @@ def cart():
         print("Your shopping cart is empty.")
         return
     total_price = 0 # Starting price blank
-    print("\nItems in your cart:")
+    print("Items in your cart:")
     for name, quantity in shopping_cart.items(): # Loops through each diffrent console and its qauintity in cart
         for item in console_list: # Looks for each item in list and if it finds one that matchs gets the price for it
             if item[0] == name:
@@ -65,13 +78,13 @@ def cart():
                 break
         print(f"- {name} x{quantity} = ${price * quantity}") # Prints the price 
         total_price += price * quantity
-    print(f"\nTotal: ${total_price}")
+    print(f"Total: ${total_price}")
 
 
 
 def menu(): # Simple menu using if  else to choose options which call funcs
     while True:
-        print("\n=== Student Credit Tracker Menu ===")
+        print("\n=== Retro game shop ===")
         print("1. List of consoles")
         print("2. Search list")
         print("3. Order console")
@@ -97,5 +110,6 @@ def menu(): # Simple menu using if  else to choose options which call funcs
             break
         else:
             print("Invalid option. Please choose a valid number.")
+
 
 menu()
