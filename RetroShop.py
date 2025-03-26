@@ -7,8 +7,6 @@ console_list = [
 ]
 shopping_cart = {} 
 
-def search():
-    print("Search function not implemented yet.")
 
 def delivery():
     print("Delivery info not implemented yet.")
@@ -49,7 +47,7 @@ def order():
         chosen_console = console_list[user_input - 1] # list start from 0 so make sure its right.
         if console_list[user_input - 1][1] <= 0: # Dont allow stock to go under 1
             print("Sorry, that console is out of stock.")
-            loop = input("Continue ordering (yes)? \n> ").lower()
+            loop = input("Continue ordering (yes)? \n> ").lower().strip()
             continue  # This will stop the function here
         console_list[user_input - 1][1] -= 1 # Remove 1 from stock
         print(f"You chose the {chosen_console[0]}") # see chosen console
@@ -58,7 +56,7 @@ def order():
         else: # If name isent set the value to 1
             shopping_cart[chosen_console[0]] = 1
         cart()
-        loop = input("Add another item (yes)? \n> ").lower()
+        loop = input("Add another item (yes)? \n> ").lower().strip()
 
 
 
@@ -79,6 +77,22 @@ def cart():
         print(f"- {name} x{quantity} = ${price * quantity}") # Prints the price 
         total_price += price * quantity
     print(f"Total: ${total_price}")
+
+
+def search():
+    print_console_list()  # Shows the available consoles
+    user_input = input("What would you like to search for? ").strip().lower()
+
+    found = False
+    for item in console_list:
+        if item[0].lower() == user_input:
+            print(f"{item[0]} is in stock with quantity {item[1]} at ${item[2]}.")
+            found = True
+            break
+
+    if not found:
+        print(f"{user_input} is not in the store list.")
+
 
 
 
