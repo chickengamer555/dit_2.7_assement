@@ -7,56 +7,69 @@ console_list = [
 ]
 shopping_cart = {} 
 
+possible_awnser = [
+    # YES responses
+    "yes", "yeah", "yep", "yea", "yup", "yuh", "sure", "of course", "definitely", 
+    "absolutely", "affirmative", "indeed", "roger", "ok", "okay", "sure thing", 
+    "totally", "uh-huh", "aye", "ya", "certainly", "for sure", "you bet", "correct", 
+    "true", "right", "indubitably", "gladly", "why not", "very well",
 
-def delivery():
-    print("Delivery info not implemented yet.")
+    # NO responses
+    "no", "nope", "nah", "nuh-uh", "negative", "never", "not at all", "no way", 
+    "absolutely not", "by no means", "not really", "i don't think so", "uh-uh", 
+    "nay", "false", "incorrect", "no chance", "not happening", "out of the question",
+    "hell no", "not in a million years"
+]
 
 def checkout():
-    print("Checkout not implemented yet.")
-
-
-def int_input_check(text):
-    """
-    Asks for number with chosen text and value error built in
-    """
-    while True: # Error prevention
-        try:
-            value = int(input(text))
-            return value # Returns the value of what they entered
-        except ValueError:
-            print("Please enter a valid number.")
+    cart()
 
 
 def print_console_list():
     """
     Prints out all consoles in list
     """
-    print("Student Summary:")
+    print("Console list:")
     for i in range(len(console_list)):
         print(f"{i + 1}. {console_list[i][0]} - {console_list[i][1]} in stock - ${console_list[i][2]}")
 
 
 def order():
     """
-    Allows user to select console in list and order it
+    Allows user to select a console by typing its name and order it
     """
     loop = "yes"
     while loop == "yes":
         print_console_list()
-        user_input = int_input_check("Choose a console via number its next to:\n> ")
-        chosen_console = console_list[user_input - 1] # list start from 0 so make sure its right.
-        if console_list[user_input - 1][1] <= 0: # Dont allow stock to go under 1
+        user_input = input("Type the name of the console you want to order:\n> ").strip().lower()
+        found_console = None # Checks if console is found
+        for console in console_list: # Loops through whole list
+            if console[0].lower() == user_input: # scans through list for the console
+                found_console = console # gets what the user typed and puts it into console 
+                break
+        if not found_console: # If there isent a console use error prevention 
+            print("Console not found, check the name and try again")
+            continue
+        if found_console[1] <= 0: # if the console has less then 0 stock use error prevention so stock cant go -
             print("Sorry, that console is out of stock.")
             loop = input("Continue ordering (yes)? \n> ").lower().strip()
-            continue  # This will stop the function here
-        console_list[user_input - 1][1] -= 1 # Remove 1 from stock
-        print(f"You chose the {chosen_console[0]}") # see chosen console
-        if chosen_console[0] in shopping_cart: # If the name is in the list then add 1 to the amount
-            shopping_cart[chosen_console[0]] += 1    
-        else: # If name isent set the value to 1
-            shopping_cart[chosen_console[0]] = 1
-        cart()
-        loop = input("Add another item (yes)? \n> ").lower().strip()
+            continue
+        found_console[1] -= 1 # removes 1 stock
+        print(f"You chose the {found_console[0]}")  # confirmation message
+        gfmilk = input("Would you like to add some gluten free milk on top of that?\n> ").lower().strip()
+        while gfmilk not in possible_awnser:
+            gfmilk = input("Unepected input please enter yes or no to the previous question\n>" ).lower().strip()
+        if gfmilk in ["yes", "y"]:
+            print(f"Gluten free milk added to your {found_console[0]}")
+        if found_console[0] in shopping_cart: # updates shopping cart
+            shopping_cart[found_console[0]] += 1    
+        else:
+            shopping_cart[found_console[0]] = 1
+        cart() # calls the cart
+        loop = input("Add another item (yes/no)? \n> ").lower().strip()
+        while loop not in possible_awnser:
+            loop = input("Unepected input please enter yes or no to the previous question\n>").lower().strip()
+
 
 
 
@@ -79,17 +92,13 @@ def cart():
     print(f"Total: ${total_price}")
 
 
-def search():
-    print_console_list()  # Shows the available consoles
-    user_input = input("What would you like to search for? ").strip().lower()
-
+def search(user_input):
     found = False
     for item in console_list:
         if item[0].lower() == user_input:
-            print(f"{item[0]} is in stock with quantity {item[1]} at ${item[2]}.")
+            print(f"{item[0]} is in stock with {item[1]} available for ${item[2]}.")
             found = True
             break
-
     if not found:
         print(f"{user_input} is not in the store list.")
 
@@ -100,9 +109,9 @@ def menu(): # Simple menu using if  else to choose options which call funcs
     while True:
         print("\n=== Retro game shop ===")
         print("1. List of consoles")
-        print("2. Search list")
+        print("2.")
         print("3. Order console")
-        print("4. Addresse/Pick up location")
+        print("")
         print("5. Review cart")
         print("6. Checkout")
         print("7. Quit")
@@ -110,11 +119,11 @@ def menu(): # Simple menu using if  else to choose options which call funcs
         if choice == "1":
             print_console_list()
         elif choice == "2":
-            search()
+            break
         elif choice == "3":
             order()
         elif choice == "4":
-            delivery()
+            break
         elif choice == "5":
             cart()
         elif choice == "6":
