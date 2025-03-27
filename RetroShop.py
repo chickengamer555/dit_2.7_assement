@@ -7,22 +7,30 @@ console_list = [
 ]
 shopping_cart = {} 
 
-possible_awnser = [
-    # YES responses
+yes_answers = [
     "yes", "yeah", "yep", "yea", "yup", "yuh", "sure", "of course", "definitely", 
     "absolutely", "affirmative", "indeed", "roger", "ok", "okay", "sure thing", 
     "totally", "uh-huh", "aye", "ya", "certainly", "for sure", "you bet", "correct", 
     "true", "right", "indubitably", "gladly", "why not", "very well",
+]
 
-    # NO responses
+no_answers = [
     "no", "nope", "nah", "nuh-uh", "negative", "never", "not at all", "no way", 
     "absolutely not", "by no means", "not really", "i don't think so", "uh-uh", 
     "nay", "false", "incorrect", "no chance", "not happening", "out of the question",
     "hell no", "not in a million years"
 ]
 
+
 def checkout():
     cart()
+
+
+def yes_no_loop(text):
+    loop = input(text).lower().strip()
+    while loop not in yes_answers + no_answers:
+        loop = input("Unepected input please enter yes or no to the previous question\n> ").lower().strip()
+    return loop
 
 
 def print_console_list():
@@ -39,7 +47,7 @@ def order():
     Allows user to select a console by typing its name and order it
     """
     loop = "yes"
-    while loop == "yes":
+    while loop in yes_answers:
         print_console_list()
         user_input = input("Type the name of the console you want to order:\n> ").strip().lower()
         found_console = None # Checks if console is found
@@ -56,19 +64,16 @@ def order():
             continue
         found_console[1] -= 1 # removes 1 stock
         print(f"You chose the {found_console[0]}")  # confirmation message
-        gfmilk = input("Would you like to add some gluten free milk on top of that?\n> ").lower().strip()
-        while gfmilk not in possible_awnser:
-            gfmilk = input("Unepected input please enter yes or no to the previous question\n>" ).lower().strip()
-        if gfmilk in ["yes", "y"]:
+        gf_milk = yes_no_loop("Would you like to add some gluten free milk on top of that?\n> ")
+        if gf_milk in yes_answers:
             print(f"Gluten free milk added to your {found_console[0]}")
         if found_console[0] in shopping_cart: # updates shopping cart
             shopping_cart[found_console[0]] += 1    
         else:
             shopping_cart[found_console[0]] = 1
         cart() # calls the cart
-        loop = input("Add another item (yes/no)? \n> ").lower().strip()
-        while loop not in possible_awnser:
-            loop = input("Unepected input please enter yes or no to the previous question\n>").lower().strip()
+        loop = yes_no_loop("Add another item (yes/no)? \n> ")
+
 
 
 
@@ -92,30 +97,44 @@ def cart():
     print(f"Total: ${total_price}")
 
 
-def search(user_input):
-    found = False
-    for item in console_list:
-        if item[0].lower() == user_input:
-            print(f"{item[0]} is in stock with {item[1]} available for ${item[2]}.")
-            found = True
-            break
-    if not found:
-        print(f"{user_input} is not in the store list.")
 
+def cart_function():
+    if not shopping_cart:
+        return
+    cart()
+    loop = "yes"
+    while loop in yes_answers:
+        loop = yes_no_loop("Would you like to remove an item or add a item in your shopping cart (yes/no)?\n> ")
+        while True:
+            cart_question = input("""
+=== Cart functions ===                             
+1. Remove
+2. Add
+3. Quit\n>
+""").lower().strip()
+            if cart_question == "1" or cart_question == "remove":
+                print("remove")
+            if cart_question == "2" or cart_question == "add":
+                print("remove")
+            if cart_question == "3" or cart_question == "quit":
+                menu()
 
+            
+            
 
 
 def menu(): # Simple menu using if  else to choose options which call funcs
     while True:
-        print("\n=== Retro game shop ===")
-        print("1. List of consoles")
-        print("2.")
-        print("3. Order console")
-        print("")
-        print("5. Review cart")
-        print("6. Checkout")
-        print("7. Quit")
-        choice = input("> ")
+        choice = input("""
+=== Retro game shop ===
+1. List of consoles
+2.
+3. Order console
+4.
+5. Review cart
+6. Checkout
+7. Quit\n>
+""")
         if choice == "1":
             print_console_list()
         elif choice == "2":
@@ -126,6 +145,7 @@ def menu(): # Simple menu using if  else to choose options which call funcs
             break
         elif choice == "5":
             cart()
+            cart_function()
         elif choice == "6":
             checkout()
         elif choice == "7":
