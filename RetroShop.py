@@ -5,6 +5,7 @@ console_list = [
     ["PSP", 12, 130],
     ["Ps vita", 9, 250]
 ]
+
 shopping_cart = {} 
 
 yes_answers = [
@@ -49,19 +50,7 @@ def order():
     loop = "yes"
     while loop in yes_answers:
         print_console_list()
-        user_input = input("Type the name of the console you want to order:\n> ").strip().lower()
-        found_console = None # Checks if console is found
-        for console in console_list: # Loops through whole list
-            if console[0].lower() == user_input: # scans through list for the console
-                found_console = console # gets what the user typed and puts it into console 
-                break
-        if not found_console: # If there isent a console use error prevention 
-            print("Console not found, check the name and try again")
-            continue
-        if found_console[1] <= 0: # if the console has less then 0 stock use error prevention so stock cant go -
-            print("Sorry, that console is out of stock.")
-            loop = input("Continue ordering (yes)? \n> ").lower().strip()
-            continue
+        found_console = console_finder("order")
         found_console[1] -= 1 # removes 1 stock
         print(f"You chose the {found_console[0]}")  # confirmation message
         gf_milk = yes_no_loop("Would you like to add some gluten free milk on top of that?\n> ")
@@ -74,8 +63,17 @@ def order():
         cart() # calls the cart
         loop = yes_no_loop("Add another item (yes/no)? \n> ")
 
-
-
+def console_finder(text):
+    user_input = input(f"Type the name of the console you want to {text}:\n> ").strip().lower()
+    found_console = None # Checks if console is found
+    for console in console_list: # Loops through whole list
+        if console[0].lower() == user_input: # scans through list for the console
+            found_console = console # gets what the user typed and puts it into console 
+            return found_console
+        if not found_console: # If there isent a console use error prevention 
+            print("Console not found, check the name and try again")
+            continue
+        
 
 
 def cart():
@@ -105,20 +103,30 @@ def cart_function():
     loop = "yes"
     while loop in yes_answers:
         loop = yes_no_loop("Would you like to remove an item or add a item in your shopping cart (yes/no)?\n> ")
-        while True:
-            cart_question = input("""
+        if loop in yes_answers:
+            while True:
+                cart_question = input("""
 === Cart functions ===                             
 1. Remove
 2. Add
-3. Quit\n>
-""").lower().strip()
-            if cart_question == "1" or cart_question == "remove":
-                print("remove")
-            if cart_question == "2" or cart_question == "add":
-                print("remove")
-            if cart_question == "3" or cart_question == "quit":
-                menu()
-
+3. Quit\n> """).lower().strip()
+                if cart_question == "1" or cart_question == "remove":
+                    found_console = console_finder("remove")
+                    if found_console[0] in shopping_cart:
+                        del shopping_cart[found_console[0]]
+                        found_console[1] += 1
+                        print(f"{found_console[0]} removed from cart.")
+                    else:
+                        print(f"{found_console[0]} is not in your cart.")
+                if cart_question == "2" or cart_question == "add":
+                    print("add")
+                    menu()
+                if cart_question == "3" or cart_question == "quit":
+                    menu()
+                else:
+                    print("Invalid input. Make sure you chose a proper option.")
+        if loop not in yes_answers:
+            menu()
             
             
 
@@ -133,8 +141,7 @@ def menu(): # Simple menu using if  else to choose options which call funcs
 4.
 5. Review cart
 6. Checkout
-7. Quit\n>
-""")
+7. Quit\n> """)
         if choice == "1":
             print_console_list()
         elif choice == "2":
