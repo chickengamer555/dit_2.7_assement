@@ -27,14 +27,29 @@ def checkout():
     cart()
     checkout_confirm = yes_no_loop("Would you like to continue to payment?\n> ")
     if checkout_confirm in yes_answers:
-        int(input("Credit card number?\n> "))
-        int(input("Cvs?\n> "))
-        input("Card holders name?\n> ")
-        int(input("Expire date on card\n> "))
-
-    else:
-        menu()
-
+        while True:
+            card_number = input("Card number?\n> ")
+            if card_number.isdigit() and len(card_number) == 16:
+                break
+            print("Please enter a valid card number thats 16 digits.")        
+        while True:
+            cvv = input("CVV?\n> ")
+            if cvv.isdigit() and len(cvv) == 3:
+                break
+            print("CVV must be exactly 3 digits.")
+        blank_checker("Card holders name?", "Name cant be blank")
+        while True:
+            exp_date = input("Expiry date (MMYY)?\n> ")
+            if exp_date.isdigit() and len(exp_date) == 4:
+                break
+            print("Expiry date must be 4 digits (MMYY).")
+        blank_checker("Please enter a delivery adress", "Error delivery adress cant be blank")
+        del shopping_cart
+def blank_checker(text1, text2):
+    blank_check = input(f"{text1}\n> ")
+    while blank_check.strip() == "":
+        print(text2)
+        blank_check = input(f"{text1}\n> ")
 
 def yes_no_loop(text):
     loop = input(text).lower().strip()
