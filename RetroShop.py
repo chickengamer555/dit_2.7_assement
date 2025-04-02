@@ -6,7 +6,7 @@ console_list = [
     ["Ps vita", 9, 250]
 ]
 
-shopping_cart = {"PS3": 3} 
+shopping_cart = []
 
 yes_answers = [
     "yes", "yeah", "yep", "yea", "yup", "yuh", "sure", "of course", "definitely", 
@@ -28,28 +28,33 @@ def checkout():
     checkout_confirm = yes_no_loop("Would you like to continue to payment?\n> ")
     if checkout_confirm in yes_answers:
         while True:
-            card_number = input("Card number?\n> ")
+            card_number = input("Card number?\n> ").strip().replace(" ", "")
             if card_number.isdigit() and len(card_number) == 16:
                 break
             print("Please enter a valid card number thats 16 digits.")        
         while True:
-            cvv = input("CVV?\n> ")
+            cvv = input("CVV?\n> ").strip().replace(" ", "")
             if cvv.isdigit() and len(cvv) == 3:
                 break
             print("CVV must be exactly 3 digits.")
         blank_checker("Card holders name?", "Name cant be blank")
         while True:
-            exp_date = input("Expiry date (MMYY)?\n> ")
+            exp_date = input("Expiry date (MMYY)?\n> ").strip()
             if exp_date.isdigit() and len(exp_date) == 4:
                 break
             print("Expiry date must be 4 digits (MMYY).")
         blank_checker("Please enter a delivery adress", "Error delivery adress cant be blank")
-        del shopping_cart
-def blank_checker(text1, text2):
+        shopping_cart.clear()
+        print("Payment has cleared your package will be with you shortly")
+        menu()
+
+
+def blank_checker(text1, error):
     blank_check = input(f"{text1}\n> ")
     while blank_check.strip() == "":
-        print(text2)
+        print(error)
         blank_check = input(f"{text1}\n> ")
+
 
 def yes_no_loop(text):
     loop = input(text).lower().strip()
@@ -59,6 +64,9 @@ def yes_no_loop(text):
 
 
 def print_console_list():
+    if not console_list:
+        print("Sorry we have ran out of stock on everything")
+        menu()
     """
     Prints out all consoles in list
     """
@@ -75,35 +83,57 @@ def order():
     while loop in yes_answers:
         print_console_list()
         found_console = console_finder("order")
+        avalible_stock = found_console[1]
         print(f"You chose the {found_console[0]}")  # confirmation message
-        if found_console[1] <= 0: # if the console has less then 0 stock use error prevention so stock cant go -
+        if avalible_stock <= 0: # if the console has less then 0 stock use error prevention so stock cant go -
             loop = yes_no_loop("Sorry, that console is out of stock would you like to contuine?\n> ")
             if loop in yes_answers:
                 continue  # This will stop the function here
             if loop not in yes_answers:
                 menu()
+        while True:
+            try:
+                qaunity = int(input("How many would you like to order?\n> ").strip())
+                if qaunity <= 0:
+                    print("Please enter a postive number")
+                elif qaunity > avalible_stock:
+                    print(f"Sorry we only have {avalible_stock} in stock. Please try again")
+                else:
+                    break
+            except ValueError:
+                print("Error please make sure you enter a number")
         gf_milk = yes_no_loop("Would you like to add some gluten free milk on top of that?\n> ")
         if gf_milk in yes_answers:
             print(f"Gluten free milk added to your {found_console[0]}")
-            found_console[1] -= 1 # removes 1 stock
-        if found_console[0] in shopping_cart: # updates shopping cart
-            shopping_cart[found_console[0]] += 1    
+        cart_item = cart_finder(found_console[0])
+        if cart_item:
+            cart_item[1] += qaunity
         else:
-            shopping_cart[found_console[0]] = 1
+            shopping_cart.append([found_console[0], qaunity, found_console[2]])
+        found_console[1] -= qaunity
+        if found_console[1] <= 0:
+            console_list.remove(found_console)
         cart() # calls the cart
         loop = yes_no_loop("Add another item (yes/no)? \n> ")
 
 
+def cart_finder(name):
+    for item in shopping_cart:
+        if item[0].lower() == name.lower():
+            return item
+    return None
 
 
-def console_finder(text):
+def console_finder(text, return_to_menu = False):
     while True:
         user_input = input(f"Type the name of the console you want to {text}:\n> ").strip().lower()
         for console in console_list: # Loops through whole list
             if console[0].lower() == user_input: # scans through list for the console
                 found_console = console # gets what the user typed and puts it into console 
                 return found_console
-        print("Error console could not be found")
+        print("Console could not be found in our list")
+        if return_to_menu:
+            menu()
         
 
 def cart():
@@ -115,13 +145,11 @@ def cart():
         menu()
     total_price = 0 # Starting price blank
     print("Items in your cart:")
-    for name, quantity in shopping_cart.items(): # Loops through each diffrent console and its qauintity in cart
-        for item in console_list: # Looks for each item in list and if it finds one that matchs gets the price for it
-            if item[0] == name:
-                price = item[2]
-                break
-        print(f"- {name} x{quantity} = ${price * quantity}") # Prints the price 
-        total_price += price * quantity
+    for item in shopping_cart: # Loops through each diffrent console and its qauintity in cart
+        name, qaunity, price = item
+        price = item[2]
+        print(f"- {name} x{qaunity} = ${price * qaunity}")
+        total_price += price * qaunity
     print(f"Total: ${total_price}")
 
 
@@ -129,18 +157,21 @@ def cart():
 def cart_function():
     if not shopping_cart:
         return
-    cart()
     loop = "yes"
     while loop in yes_answers:
         loop = yes_no_loop("Would you like to remove an item in your shopping cart (yes/no)?\n> ")
         if loop in yes_answers:
             while True:
-                found_console = console_finder("remove")
-                if found_console[0] in shopping_cart:
-                    del shopping_cart[found_console[0]]
-                    found_console[1] += 1
-                    print(f"{found_console[0]} removed from cart.")
-                    menu()
+                item_name = input("What item would you like to remove from cart?\n> ")
+                cart_item = cart_finder(item_name)
+                if cart_item:
+                    shopping_cart.remove(cart_item)
+                    print(f"{item_name} removed from cart.")
+                else:
+                    print("Item not found in cart.")
+            else:
+                break
+
                 
             
 
@@ -148,19 +179,20 @@ def menu(): # Simple menu using if  else to choose options which call funcs
     while True:
         choice = input("""
 === Retro game shop ===
-1. List of consoles
-2.
-3. Order console
+1. Order consoles
+2. Consoles in stock
+3. Search for a console
 4.
-5. Review cart
+5. Items in cart
 6. Checkout
 7. Quit\n> """)
         if choice == "1":
-            print_console_list()
-        elif choice == "2":
-            break
-        elif choice == "3":
             order()
+        elif choice == "2":
+            print_console_list()
+        elif choice == "3":
+            found_console = console_finder("search for", return_to_menu = True)
+            print(f"{found_console[0]} was found. We currently have a stock of {found_console[1]}, and its price is set at ${found_console[2]}")
         elif choice == "4":
             break
         elif choice == "5":
