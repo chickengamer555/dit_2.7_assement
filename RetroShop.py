@@ -51,11 +51,24 @@ def checkout():
         menu()
 
 
+def int_input_check(text):
+    """
+    Asks for number with chosen text and value error built in
+    """
+    while True: # Error prevention
+        try:
+            value = int(input(text))
+            return value # Returns the value of what they entered
+        except ValueError:
+            print("Please enter a valid number.")
+
+
 def blank_checker(text1, error):
-    blank_check = input(f"{text1}\n> ")
+    blank_check = input(f"{text1}\n> ").strip().lower()
     while blank_check.strip() == "":
         print(error)
         blank_check = input(f"{text1}\n> ")
+    return blank_check
 
 
 def yes_no_loop(text):
@@ -186,8 +199,57 @@ def cart_function():
                             print("Error please enter a valid number")
  
 
-                
+def add_new_console():
+    console = blank_checker("What is the new console that we are stocking?", "Error no console was submited")
+        # Asks for year and all the diffrent credits
+    stock = int_input_check("How much stock will we have?\n> ")
+    price = int_input_check("What will our price be?\n> ")
+    console_list.append([console, stock, price]) # Adds in all the data added 
+    print(f"Console added: {console} Stock: {stock}, Price: ${price}") # Prints out what was added    
+    admin_menu()           
             
+
+def add_to_stock():
+    loop = "yes"
+    while loop in yes_answers:
+        print_console_list()
+        found_console = console_finder("add stock to")
+        print(f"You chose the {found_console[0]}")  # confirmation message
+        while True:
+                qaunity = int_input_check("How much stock would you like to add?\n> ")
+                if qaunity <= 0:
+                    print("Please enter a postive number")
+                else:
+                    break
+        found_console[1] += qaunity
+        print(f"{qaunity} units added to {found_console[0]}. New stock: {found_console[1]}")
+        loop = yes_no_loop("Add another item (yes/no)? \n> ")
+    admin_menu()
+
+
+
+def admin_menu():
+    password = ["password"]
+    password_check = blank_checker("Please enter the admin password to make sure your supposed to be here", "Error password cant be blank")
+    if password_check in password:
+        pass
+    if password_check not in password:
+        print("You are not supposed to be here")
+        menu()
+    while True:
+        choice = input("""
+=== ADMIN MENU ===
+1. Add to previous stock
+2. Add new console
+3. Quit\n> """)
+        if choice == "1":
+            add_to_stock()
+        elif choice == "2":
+            add_new_console()
+        elif choice == "3":
+            menu()
+        else:
+            print("Invalid option. Please choose a valid number.")
 
 def menu(): # Simple menu using if  else to choose options which call funcs
     while True:
@@ -199,7 +261,7 @@ def menu(): # Simple menu using if  else to choose options which call funcs
 4.
 5. Items in cart
 6. Checkout
-7. Quit\n> """)
+7. Quit\n> """).strip().lower()
         if choice == "1":
             order()
         elif choice == "2":
@@ -217,6 +279,8 @@ def menu(): # Simple menu using if  else to choose options which call funcs
         elif choice == "7":
             print("Goodbye!")
             break
+        elif choice == "admin menu":
+            admin_menu()
         else:
             print("Invalid option. Please choose a valid number.")
 
