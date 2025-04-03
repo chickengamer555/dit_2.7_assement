@@ -6,7 +6,9 @@ console_list = [
     ["Ps vita", 9, 250]
 ]
 
-shopping_cart = []
+shopping_cart = [
+    ["PS3", 3, 130]
+]
 
 yes_answers = [
     "yes", "yeah", "yep", "yea", "yup", "yuh", "sure", "of course", "definitely", 
@@ -131,7 +133,7 @@ def console_finder(text, return_to_menu = False):
             if console[0].lower() == user_input: # scans through list for the console
                 found_console = console # gets what the user typed and puts it into console 
                 return found_console
-        print("Console could not be found in our list")
+        print("Console could not be found in our list or is not in stock")
         if return_to_menu:
             menu()
         
@@ -159,18 +161,30 @@ def cart_function():
         return
     loop = "yes"
     while loop in yes_answers:
-        loop = yes_no_loop("Would you like to remove an item in your shopping cart (yes/no)?\n> ")
+        loop = yes_no_loop("Would you like to remove a item in your shopping cart (yes/no)?\n> ")
         if loop in yes_answers:
             while True:
-                item_name = input("What item would you like to remove from cart?\n> ")
+                item_name = input("What item would you like to remove from cart?\n> ").strip()
                 cart_item = cart_finder(item_name)
                 if cart_item:
-                    shopping_cart.remove(cart_item)
-                    print(f"{item_name} removed from cart.")
+                    break
                 else:
-                    print("Item not found in cart.")
-            else:
-                break
+                    print("Item not found in cart please try again.")
+            while True:
+                try:
+                    qaunity = int(input("How many would you like to remove?\n> "))
+                    if qaunity <= 0:
+                        print("Please enter a postive number")
+                    elif qaunity > cart_item[1]:
+                        print(f"Sorry you only have {cart_item[1]} in your cart. Please try again")
+                    else:
+                        cart_item[1] -= qaunity
+                        print(f"{cart_item[0]} has had {qaunity} removed from it.")
+                        cart()
+                        break
+                except ValueError:
+                            print("Error please enter a valid number")
+ 
 
                 
             
