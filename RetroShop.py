@@ -107,16 +107,13 @@ def order():
             if loop not in yes_answers:
                 menu()
         while True:
-            try:
-                qaunity = int(input("How many would you like to order?\n> ").strip())
-                if qaunity <= 0:
-                    print("Please enter a postive number")
-                elif qaunity > avalible_stock:
-                    print(f"Sorry we only have {avalible_stock} in stock. Please try again")
-                else:
-                    break
-            except ValueError:
-                print("Error please make sure you enter a number")
+            qaunity = int_input_check("How many would you like to order?\n> ")
+            if qaunity <= 0:
+                print("Please enter a postive number")
+            elif qaunity > avalible_stock:
+                print(f"Sorry we only have {avalible_stock} in stock. Please try again")
+            else:
+                break
         gf_milk = yes_no_loop("Would you like to add some gluten free milk on top of that?\n> ")
         if gf_milk in yes_answers:
             print(f"Gluten free milk added to your {found_console[0]}")
@@ -170,38 +167,76 @@ def cart():
 
 
 def cart_function():
-    if not shopping_cart:
-        return
+    while True:
+        choice = input("""
+=== CART FUNCTIONS ===
+1. Remove from cart
+2. Add stock in cart
+3. Quit\n> """).strip()
+        if choice == "1":
+            cart_remove()
+        elif choice == "2":
+            cart_stock()
+        elif choice == "3":
+            menu()
+        else:
+            print("Invalid option. Please choose a valid number.")
+            
+
+def cart_stock():
+    cart()
     loop = "yes"
     while loop in yes_answers:
-        loop = yes_no_loop("Would you like to remove a item in your shopping cart (yes/no)?\n> ")
-        if loop in yes_answers:
-            while True:
-                item_name = input("What item would you like to remove from cart?\n> ").strip()
-                cart_item = cart_finder(item_name)
-                if cart_item:
-                    break
-                else:
-                    print("Item not found in cart please try again.")
-            while True:
-                try:
-                    qaunity = int(input("How many would you like to remove?\n> "))
-                    if qaunity <= 0:
-                        print("Please enter a postive number")
-                    elif qaunity > cart_item[1]:
-                        print(f"Sorry you only have {cart_item[1]} in your cart. Please try again")
-                    else:
-                        cart_item[1] -= qaunity
-                        print(f"{cart_item[0]} has had {qaunity} removed from it.")
-                        cart()
-                        break
-                except ValueError:
-                            print("Error please enter a valid number")
- 
+        console_name = blank_checker("What item would you like to add stock to in your cart?", "Error: console cant be blank")
+        found_console = cart_finder(console_name)
+        for console in console_list:
+            if console[0].lower() == found_console[0].lower():
+                qauinty = console[1]
+                break
+        else:
+            print(f"There is no stock left for {found_console[0]}")
+            loop = yes_no_loop("Would you still like to add to stock (yes/no)?\n> ", "Console name cant be blanked")
+            continue
+        print(f"You chose the {found_console[0]}. You can add up to {qauinty} more")
+        while True:
+            qaunity = int_input_check("How much stock would you like to add?\n> ")
+            if qaunity <= 0:
+                print("Please enter a positive number.")
+            elif qaunity > qauinty:
+                print(f"Sorry, you can only add up to {qauinty}.")
+            else:
+                break
+        found_console[1] += qaunity
+        console[1] -= qaunity
+        print(f"{qaunity} units added to {found_console[0]}. New quantity in cart: {found_console[1]}")
+        loop = yes_no_loop("Add more stock (yes/no)? \n> ")
+    cart_function()
+
+
+def cart_remove():
+    cart()
+    while True:
+        item_name = input("What item would you like to remove from cart?\n> ").strip()
+        cart_item = cart_finder(item_name)
+        if cart_item:
+            break
+        else:
+            print("Item not found in cart please try again.")
+    while True:
+        qaunity = int_input_check("How many would you like to remove?\n> ")
+        if qaunity <= 0:
+            print("Please enter a postive number")
+        elif qaunity > cart_item[1]:
+            print(f"Sorry you only have {cart_item[1]} in your cart. Please try again")
+        else:
+            cart_item[1] -= qaunity
+            print(f"{cart_item[0]} has had {qaunity} stock removed from it.")
+            cart_function()
+            break
+
 
 def add_new_console():
     console = blank_checker("What is the new console that we are stocking?", "Error no console was submited")
-        # Asks for year and all the diffrent credits
     stock = int_input_check("How much stock will we have?\n> ")
     price = int_input_check("What will our price be?\n> ")
     console_list.append([console, stock, price]) # Adds in all the data added 
@@ -223,19 +258,12 @@ def add_to_stock():
                     break
         found_console[1] += qaunity
         print(f"{qaunity} units added to {found_console[0]}. New stock: {found_console[1]}")
-        loop = yes_no_loop("Add another item (yes/no)? \n> ")
+        loop = yes_no_loop("Add stock to another item (yes/no)? \n> ")
     admin_menu()
 
 
 
 def admin_menu():
-    password = ["password"]
-    password_check = blank_checker("Please enter the admin password to make sure your supposed to be here", "Error password cant be blank")
-    if password_check in password:
-        pass
-    if password_check not in password:
-        print("You are not supposed to be here")
-        menu()
     while True:
         choice = input("""
 === ADMIN MENU ===
@@ -250,6 +278,7 @@ def admin_menu():
             menu()
         else:
             print("Invalid option. Please choose a valid number.")
+
 
 def menu(): # Simple menu using if  else to choose options which call funcs
     while True:
@@ -270,17 +299,27 @@ def menu(): # Simple menu using if  else to choose options which call funcs
             found_console = console_finder("search for", return_to_menu = True)
             print(f"{found_console[0]} was found. We currently have a stock of {found_console[1]}, and its price is set at ${found_console[2]}")
         elif choice == "4":
-            break
+            menu()
         elif choice == "5":
             cart()
-            cart_function()
+            loop = yes_no_loop("Would you like to access cart functions\n> ")
+            if loop in yes_answers:
+                cart_function()
+            if loop in no_answers:
+                menu()
         elif choice == "6":
             checkout()
         elif choice == "7":
             print("Goodbye!")
             break
         elif choice == "admin menu":
+            password = ["gluten free milk"]
+            password_check = blank_checker("Please enter the admin password to make sure your supposed to be here", "Error password cant be blank")
+        if password_check in password:
             admin_menu()
+        if password_check not in password:
+            print("You are not supposed to be here")
+            menu()
         else:
             print("Invalid option. Please choose a valid number.")
 
