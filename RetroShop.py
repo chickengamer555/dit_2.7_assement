@@ -7,7 +7,6 @@ console_list = [
 ]
 
 shopping_cart = [
-    ["PS3", 3, 130]
 ]
 
 yes_answers = [
@@ -104,7 +103,7 @@ def order():
             loop = yes_no_loop("Sorry, that console is out of stock would you like to contuine?\n> ")
             if loop in yes_answers:
                 continue  # This will stop the function here
-            if loop not in yes_answers:
+            else:
                 menu()
         while True:
             qaunity = int_input_check("How many would you like to order?\n> ")
@@ -127,6 +126,7 @@ def order():
             console_list.remove(found_console)
         cart() # calls the cart
         loop = yes_no_loop("Add another item (yes/no)? \n> ")
+    menu()
 
 
 def cart_finder(name):
@@ -154,7 +154,7 @@ def cart():
     """
     if not shopping_cart:
         print("Your shopping cart is empty.")
-        menu()
+        return
     total_price = 0 # Starting price blank
     print("Items in your cart:")
     for item in shopping_cart: # Loops through each diffrent console and its qauintity in cart
@@ -167,6 +167,8 @@ def cart():
 
 
 def cart_function():
+    if not shopping_cart:
+        return
     while True:
         choice = input("""
 === CART FUNCTIONS ===
@@ -189,13 +191,17 @@ def cart_stock():
     while loop in yes_answers:
         console_name = blank_checker("What item would you like to add stock to in your cart?", "Error: console cant be blank")
         found_console = cart_finder(console_name)
+        if not found_console:
+            print("That item is not in your cart")
+            loop = yes_no_loop("Would you like to try a diffrent item? (yes/no)\n> ")
+            continue
         for console in console_list:
             if console[0].lower() == found_console[0].lower():
                 qauinty = console[1]
                 break
         else:
             print(f"There is no stock left for {found_console[0]}")
-            loop = yes_no_loop("Would you still like to add to stock (yes/no)?\n> ", "Console name cant be blanked")
+            loop = yes_no_loop("Would you still like to add to stock (yes/no)?\n> ")
             continue
         print(f"You chose the {found_console[0]}. You can add up to {qauinty} more")
         while True:
@@ -287,10 +293,9 @@ def menu(): # Simple menu using if  else to choose options which call funcs
 1. Order consoles
 2. Consoles in stock
 3. Search for a console
-4.
-5. Items in cart
-6. Checkout
-7. Quit\n> """).strip().lower()
+4. Items in cart
+5. Checkout
+6. Quit\n> """).strip().lower()
         if choice == "1":
             order()
         elif choice == "2":
@@ -299,27 +304,26 @@ def menu(): # Simple menu using if  else to choose options which call funcs
             found_console = console_finder("search for", return_to_menu = True)
             print(f"{found_console[0]} was found. We currently have a stock of {found_console[1]}, and its price is set at ${found_console[2]}")
         elif choice == "4":
-            menu()
-        elif choice == "5":
             cart()
-            loop = yes_no_loop("Would you like to access cart functions\n> ")
-            if loop in yes_answers:
-                cart_function()
-            if loop in no_answers:
-                menu()
-        elif choice == "6":
+            if shopping_cart:
+                loop = yes_no_loop("Would you like to access cart functions\n> ")
+                if loop in yes_answers:
+                    cart_function()
+                if loop in no_answers:
+                    menu()
+        elif choice == "5":
             checkout()
-        elif choice == "7":
+        elif choice == "6":
             print("Goodbye!")
             break
         elif choice == "admin menu":
             password = ["gluten free milk"]
             password_check = blank_checker("Please enter the admin password to make sure your supposed to be here", "Error password cant be blank")
-        if password_check in password:
-            admin_menu()
-        if password_check not in password:
-            print("You are not supposed to be here")
-            menu()
+            if password_check in password:
+                admin_menu()
+            if password_check not in password:
+                print("You are not supposed to be here")
+                menu()
         else:
             print("Invalid option. Please choose a valid number.")
 
